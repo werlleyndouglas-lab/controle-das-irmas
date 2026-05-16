@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Controle das Irmãs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSS externo -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- jsPDF para gerar PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- HEADER -->
+    <header>
+      <div class="logo">
+        <div class="logo-circle"></div>
+        <div>
+          <h1>Controle das Irmãs</h1>
+          <div class="muted">Despesas & Saúde da mamãe</div>
+        </div>
+      </div>
+
+      <div class="user-info">
+        <span id="currentUserTag" class="tag hidden"></span>
+        <button id="btnLogout" class="btn outline hidden">Sair</button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+
+      <!-- LOGIN -->
+      <section id="loginSection" class="card">
+        <div class="card-title">
+          <h2>Quem está acessando?</h2>
+          <span class="muted">Selecione seu nome (sem senha)</span>
+        </div>
+
+        <div class="login-grid">
+          <button class="sister-btn sister-amanda" data-sister="Amanda">💗 Amanda</button>
+          <button class="sister-btn sister-aninha" data-sister="Aninha">💙 Aninha</button>
+          <button class="sister-btn sister-talita" data-sister="Talita">💚 Talita</button>
+          <button class="sister-btn sister-thais" data-sister="Thais">💛 Thais</button>
+        </div>
+      </section>
+
+      <!-- ÁREA PRINCIPAL -->
+      <section id="mainSection" class="hidden">
+
+        <!-- TOPO -->
+        <div class="card">
+          <div class="card-title">
+            <h2 id="moduleTitle">Despesas</h2>
+
+            <div class="top-actions">
+              <div class="tabs">
+                <button class="tab-btn active" data-module="despesas">Despesas</button>
+                <button class="tab-btn" data-module="saude">Saúde</button>
+              </div>
+
+              <!-- OPÇÕES DE PDF -->
+              <select id="pdfTipo">
+                <option value="despesas">Despesas</option>
+                <option value="saude">Saúde</option>
+              </select>
+
+              <select id="pdfEscopo">
+                <option value="mes">Mês (filtros)</option>
+                <option value="todos">Todo o período</option>
+              </select>
+
+              <button id="btnGeneratePdf" class="btn secondary">📄 PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESPESAS -->
+        <section id="despesasSection" class="layout-two-columns">
+
+          <!-- DASHBOARD FINANCEIRO -->
+          <div id="dashboardSection" class="card">
+            <div class="card-title">
+              <h2>Dashboard Financeiro</h2>
+            </div>
+
+            <div class="dashboard-grid">
+              <div class="dash-item">
+                <h3>Total do mês</h3>
+                <span id="dashTotalMes">R$ 0,00</span>
+              </div>
+
+              <div class="dash-item">
+                <h3>Minhas despesas</h3>
+                <span id="dashMinhasDespesas">R$ 0,00</span>
+              </div>
+
+              <div class="dash-item">
+                <h3>Quanto devo</h3>
+                <span id="dashDevo">R$ 0,00</span>
+              </div>
+
+              <div class="dash-item">
+                <h3>Quanto devem pra mim</h3>
+                <span id="dashReceber">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div class="filtros">
+              <label>Mês</label>
+              <select id="filtroMes"></select>
+
+              <label>Ano</label>
+              <select id="filtroAno"></select>
+
+              <button id="btnAplicarFiltro" class="btn secondary">Aplicar</button>
+            </div>
+          </div>
+
+          <!-- FORM DESPESA -->
+          <div class="card">
+            <div class="card-title">
+              <h2>Nova despesa</h2>
+            </div>
+
+            <form id="formDespesa">
+              <label>Data</label>
+              <input type="date" id="despesaData" required>
+
+              <label>Descrição</label>
+              <input type="text" id="despesaDescricao" required>
+
+              <label>Valor total (R$)</label>
+              <input type="number" id="despesaValor" step="0.01" required>
+
+              <label>Parcelas</label>
+              <input type="number" id="despesaParcelas" min="1" value="1" required>
+
+              <label>Quem pagou?</label>
+              <select id="despesaPagou" required>
+                <option value="">Selecione</option>
+                <option>Amanda</option>
+                <option>Aninha</option>
+                <option>Talita</option>
+                <option>Thais</option>
+              </select>
+
+              <label>Quem divide?</label>
+              <div class="checkbox-group">
+                <label class="checkbox-pill"><input type="checkbox" value="Amanda" class="despesa-divide"> Amanda</label>
+                <label class="checkbox-pill"><input type="checkbox" value="Aninha" class="despesa-divide"> Aninha</label>
+                <label class="checkbox-pill"><input type="checkbox" value="Talita" class="despesa-divide"> Talita</label>
+                <label class="checkbox-pill"><input type="checkbox" value="Thais" class="despesa-divide"> Thais</label>
+              </div>
+
+              <button class="btn" type="submit">Salvar</button>
+            </form>
+          </div>
+
+          <!-- LISTA DESPESAS -->
+          <div class="card">
+            <div class="card-title">
+              <h2>Despesas registradas</h2>
+              <span id="despesasResumo" class="muted"></span>
+            </div>
+
+            <div id="despesasLista" class="list"></div>
+          </div>
+
+        </section>
+
+        <!-- SAÚDE -->
+        <section id="saudeSection" class="layout-two-columns hidden">
+
+          <!-- FORM SAÚDE -->
+          <div class="card">
+            <div class="card-title">
+              <h2>Novo agendamento</h2>
+            </div>
+
+            <form id="formSaude">
+              <label>Data</label>
+              <input type="date" id="saudeData" required>
+
+              <label>Hora</label>
+              <input type="time" id="saudeHora" required>
+
+              <label>Tipo</label>
+              <input type="text" id="saudeTipo" required>
+
+              <label>Local</label>
+              <input type="text" id="saudeLocal">
+
+              <label>Acompanhante</label>
+              <select id="saudeAcompanhante" required>
+                <option value="">Selecione</option>
+                <option>Amanda</option>
+                <option>Aninha</option>
+                <option>Talita</option>
+                <option>Thais</option>
+              </select>
+
+              <label>Resumo</label>
+              <textarea id="saudeResumo"></textarea>
+
+              <button class="btn" type="submit">Salvar</button>
+            </form>
+          </div>
+
+          <!-- LISTA SAÚDE -->
+          <div class="card">
+            <div class="card-title">
+              <h2>Agenda</h2>
+              <span id="saudeResumoLista" class="muted"></span>
+            </div>
+
+            <div id="saudeLista" class="list"></div>
+          </div>
+
+          <!-- LEMBRETES -->
+          <div class="card">
+            <div class="card-title">
+              <h2>Próximos compromissos</h2>
+            </div>
+
+            <div id="saudeLembretes" class="list"></div>
+          </div>
+
+        </section>
+
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Alterações registradas com data e hora.
+    </footer>
+  </div>
+
+  <!-- JS externo -->
+  <script src="script.js"></script>
+</body>
+</html>
